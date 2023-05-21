@@ -1,0 +1,175 @@
+Converting everything to and from wxString
+
+char* to wxString
+
+Note that in wxWidgets 3.0, it just works to pass a char array where a wxString parameter is expected, the conversion will be automatic and implicit, using the current locale encoding. So even in wx 3.0, the snippets presented below still make sense when you don't want to be at the mercy of the current locale encoding.
+
+const char* chars = "Hello world";
+
+// if your string is UTF-8 encoded, this is the shortest path :
+wxString mystring = wxString::FromUTF8(chars);
+
+// You can also convert from many encodings by passing the
+// appropriate wxConv... parameter to the constructor
+wxString mystring2(chars, wxConvUTF8);
+
+******************************************************************
+
+wxString to char*
+
+void my_function(const char* foo)
+{
+}
+...
+wxString mystring(wxT("HelloWorld"));
+// you could give the encoding you want as a parameter to mb_str(), e.g. mb_str(wxConvUTF8)
+my_function( mystring.mb_str() );
+
+mb_str() returns a temporary pointer; if you need the output for more than one function call (as is the case above), you can store the char buffer for a little while :
+
+wxString s( wxT("some string") );
+wxCharBuffer buffer=s.ToUTF8();
+foo( buffer.data() );  // data() returns const char *
+bar( buffer.data(), strlen(buffer.data()) );  // in case you need the length of the data
+
+And if you really need to copy it in to char* (but why would you? ;) :
+
+wxString mystring(wxT("HelloWorld"));
+char cstring[1024];
+// assuming you want UTF-8, change the wxConv* parameter as needed
+strncpy(cstring, (const char*)mystring.mb_str(wxConvUTF8), 1023);
+
+You can also use ToUTF8(), since which encoding you get is clearer than with mb_str()
+
+**************************************************************************
+
+From const char* to char*:
+
+wxString mystring(wxT("HelloWorld"));
+(const_cast<char*>((const char*)mystring.mb_str()))
+
+Variadic functions (like printf) won't work with mb_str(), but this will work:
+
+wxString mystring(wxT("HelloWorld"));
+printf("%s",mystring.mb_str().data());
+
+Alternatively, use the method recommended in Potential Unicode Pitfalls:
+
+printf("%s", (const char*)mystring.mb_str())
+
+wchar_t* to wxString
+
+const wchar_t* chars = L"Hello world";
+wxString mystring(chars);
+
+*****************************************************************************
+
+wxString to wchar_t*
+
+See the following methods in the docs :
+
+wxString::wc_str() 
+wxString::wchar_str()
+
+wxString to TCHAR
+
+TCHAR tCharString[255];
+wxString myString(_T("Hello World"));
+const wxChar* myStringChars = myString.c_str();  
+for (int i = 0; i < myString.Len(); i++) {
+   tCharString[i] = myStringChars [i];
+}
+tCharString[myString.Len()] = _T('\0');
+
+int to wxString
+
+wxString mystring = wxString::Format(wxT("%i"),myint);
+
+or
+
+wxString mystring;
+mystring << myint;
+
+****************************************************************************
+
+float to wxString
+
+wxString mystring = wxString::Format(wxT("%f"), myfloat);
+
+or
+
+wxString mystring;
+mystring << myfloat;
+
+*****************************************************************************
+
+wxString to integer number
+
+wxString number(wxT("145"));
+long value;
+if(!number.ToLong(&value)) { /* error! */ }
+
+or
+
+wxString str = _T("123");
+int num;
+num = wxAtoi(str);
+
+******************************************************************************
+
+wxString to floating-point number
+
+wxString number(wxT("3.14159"));
+double value;
+if(!number.ToDouble(&value)){ /* error! */ }
+
+******************************************************************************
+
+std::string to wxString
+
+std::string stlstring = "Hello world";
+// assuming your string is encoded as UTF-8, change the wxConv* parameter as needed
+wxString mystring(stlstring.c_str(), wxConvUTF8);
+
+Starting from wxWidgets 3.0, you may also use the appropriate constructor
+
+std::string stlstring = "Hello world";
+// assuming your string is encoded as the current locale encoding (wxConvLibc)
+wxString mystring(stlstring);
+
+********************************************************************************
+
+wxString to std::string
+
+wxWidgets 2.8 :
+
+wxString mystring(wxT("HelloWorld"));
+std::string stlstring = std::string(mystring.mb_str());
+
+Under wxWidgets 3.0, you may use
+
+wxString::ToStdString()
+
+*********************************************************************************
+
+std::wstring to wxString
+
+Starting from wxWidgets 3.0, you may use the appropriate constructor
+
+std::wstring stlstring = L"Hello world";
+// assuming your string is encoded as the current locale encoding (wxConvLibc)
+wxString mystring(stlstring);
+
+
+**********************************************************************************
+
+wxString to std::wstring
+
+Under wxWidgets 3.0, you may use
+
+wxString::ToStdWstring()
+
+***********************************************************************************
+
+std::string textInput = std::string(textField->GetValue().mb_str(wxConvUTF8));
+

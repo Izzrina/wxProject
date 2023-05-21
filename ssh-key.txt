@@ -1,0 +1,77 @@
+Create ssh-key
+
+ssh-keygen -t ed25519 -C "nadine.rabitsch@gmx.at"
+
+(ssh-keygen -t rsa -b 4096 -C "your_email@example.com")
+
+ Dadurch wird ein neuer SSH-Schlüssel erzeugt und die angegebene E-Mail-Adresse als Kennzeichnung verwendet.
+
+> Generating public/private ALGORITHM key pair.
+
+Wenn du aufgefordert wirst, eine Datei einzugeben, in der der Schlüssel gespeichert werden soll, kannst du die EINGABETASTE drücken, um den Standarddateispeicherort zu akzeptieren. Hinweis: Wenn du zuvor SSH-Schlüssel erstellt hast, wirst du möglicherweise von ssh-keygen aufgefordert, einen anderen Schlüssel neu zu schreiben. In diesem Fall wird empfohlen, einen SSH-Schlüssel mit benutzerdefiniertem Namen zu erstellen. Gib hierzu den Standarddateispeicherort ein, und ersetze id_ssh_keyname durch deinen benutzerdefinierten Schlüsselnamen.
+
+> Enter a file in which to save the key (/home/YOU/.ssh/ALGORITHM):[Press enter]
+
+Gib an der Eingabeaufforderung eine sichere Passphrase ein. Weitere Informationen findest du unter SSH-Schlüssel-Passphrasen verwenden.
+
+> Enter passphrase (empty for no passphrase): [Type a passphrase]
+> Enter same passphrase again: [Type passphrase again]
+
+Deinen SSH-Schlüssel zum SSH-Agenten hinzufügen:
+
+Bevor du dem SSH-Agent einen neuen SSH-Schlüssel hinzufügst, um deine Schlüssel zu verwalten, solltest du nach vorhandenen SSH-Schlüsseln überprüft und einen neuen SSH-Schlüssel generiert haben.
+
+    Starte den SSH-Agenten im Hintergrund.
+
+    $ eval "$(ssh-agent -s)"
+    > Agent pid 59566
+
+    Je nach Umgebung musst du möglicherweise einen anderen Befehl verwenden. So musst du möglicherweise z. B. root-Zugriff verwenden, indem du vor dem Starten des SSH-Agent sudo -s -H ausführst, oder du musst zum Ausführen des SSH-Agent exec ssh-agent bash oder exec ssh-agent zsh verwenden.
+
+    Füge deinen privaten SSH-Schlüssel zum SSH-Agenten hinzu. Wenn du deinen Schlüssel unter einem anderen Namen erstellt hast oder einen vorhandenen Schlüssel hinzufügst, der einen anderen Namen aufweist, ersetze id_ed25519 im Befehl durch den Namen der Datei deines privaten Schlüssels.
+
+    $ ssh-add ~/.ssh/id_ed25519
+    
+    ****************************************************
+     
+
+1. execute the following to begin the key creation
+
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+
+This command will create a new SSH key using the email as a label
+
+2. You will then be prompted to "Enter a file in which to save the key."
+You can specify a file location or press “Enter” to accept the default file location.
+
+> Enter a file in which to save the key (/Users/you/.ssh/id_rsa): [Press enter]
+
+3. The next prompt will ask for a secure passphrase.
+A passphrase will add an additional layer of security to the SSH and will be required anytime the SSH key is used. If someone gains access to the computer that private keys are stored on, they could also gain access to any system that uses that key. Adding a passphrase to keys will prevent this scenario.
+
+> Enter passphrase (empty for no passphrase): [Type a passphrase]
+> Enter same passphrase again: [Type passphrase again]
+
+At this point, a new SSH key will have been generated at the previously specified file path.
+
+4. Add the new SSH key to the ssh-agent
+
+The ssh-agent is another program that is part of the SSH toolsuite. The ssh-agent is responsible for holding private keys. Think of it like a keychain. In addition to holding private keys it also brokers requests to sign SSH requests with the private keys so that private keys are never passed around unsecurly.
+
+Before adding the new SSH key to the ssh-agent first ensure the ssh-agent is running by executing:
+
+$ eval "$(ssh-agent -s)"
+> Agent pid 59566
+
+Once the ssh-agent is running the following command will add the new SSH key to the local SSH agent.
+
+ssh-add -K /Users/you/.ssh/id_rsa
+
+*******************************************************************
+
+git clone https://github.com/Benutzer/Repositorium.git
+
+
+
+
+

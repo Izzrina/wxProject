@@ -1,0 +1,190 @@
+
+#include <wx/wx.h>
+#include <iostream>
+#include <sstream>
+#include <iomanip>
+#include <locale>
+#include <codecvt>
+#include <fstream>
+
+
+********************************************
+
+Enum für Ids:
+
+enum IDs {
+ BUTTON_A = wxID_HIGHEST + 1,
+
+ };
+ 
+ *******************************************
+ 
+ text = new wxTextCtrl(panel, wxID_ANY, "", wxPoint(300, 375),
+                        wxSize(200, -1));
+ text->Bind(wxEVT_TEXT, &MainFrame::on_text_changed, this);
+ 
+ void MainFrame::on_text_changed(wxCommandEvent& evt) {
+  std::string str("Text: " + evt.GetString());
+  wxLogStatus(str.c_str());
+}
+
+*********************************************
+ 
+ checkBox = new wxCheckBox(panel, wxID_ANY, "Variable setzen");
+ checkBox->Bind(wxEVT_CHECKBOX, &MyFrame::OnCheckBoxClicked, this);
+ 
+ void OnCheckBoxClicked(wxCommandEvent& event)
+    {
+        bool isChecked = checkBox->GetValue();
+        // Hier kannst du den Wert der Variablen entsprechend setzen oder verwenden
+    }
+ 
+ ********************************************
+ 
+ wxSpinCtrl* spinCtrl = new wxSpinCtrl(panel, wxID_ANY, wxString::Format("%d", minValue), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, minValue, maxValue, initialValue);
+ spinCtrl->SetIncrement(10);
+ 
+ int 	GetValue ()
+ 
+ *********************************************
+ 
+  slider = new wxSlider(panel, wxID_ANY, initialValue, minValue, maxValue, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
+  slider->Bind(wxEVT_SLIDER, &MainFrame::on_slide_changed, this);
+        
+  void MainFrame::on_slide_changed(wxCommandEvent& evt) {
+  std::string str("Slider Value: " + std::to_string(evt.GetInt()));
+  wxLogStatus(str.c_str());
+}
+
+ 
+ *********************************************
+ 
+ wxTextValidator hexValidator(wxFILTER_INCLUDE_CHAR_LIST);
+ hexValidator.SetCharIncludes("0123456789abcdefABCDEF"); // Erlaubte Zeichen: Zahlen (0-9) und die Buchstaben a-f oder A-F (hexadezimal)
+ hexField->SetValidator(hexValidator);
+ 
+ *********************************************
+ 
+ std::string filename = "text.txt";
+
+    wxFileDialog openFileDialog(this, _("Open XYZ file"), "", "",
+                       "Alle Dateien (*.*)|*.*", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
+    if (openFileDialog.ShowModal() == wxID_CANCEL){
+        return;
+
+    }     // the user changed idea...
+
+    filename = std::string(openFileDialog.GetPath().mb_str(wxConvUTF8));
+    
+ **********************************************
+ 
+     std::ifstream inputFile(filename);
+
+    if (inputFile.is_open()) {
+        std::string line;
+        while (std::getline(inputFile, line)) {
+            if (textField->GetValue() == ""){
+              textField->SetValue(line);
+            }
+            else {
+              textField->AppendText(line);
+            }
+        }
+
+    } else {
+        std::cout << "Failed to open the file." << std::endl;
+    }
+    inputFile.close();
+ 
+ ************************************************
+ 
+ std::ofstream outputFile(filename);
+
+    std::string text = std::string(textField->GetValue().mb_str(wxConvUTF8));
+
+    if (outputFile.is_open()) {
+        outputFile <<  text << std::endl;
+    }
+    outputFile.close();
+  }
+  
+  ***********************************************
+  
+  wxString MainFrame::textToHex(const std::string& input)
+  {
+    wxString output = "";
+    for (char ch : input) {
+      output.Append(wxString::Format("%02X", static_cast<int>(ch)));
+    }
+    return output;
+  }
+  
+  **************************************************
+  
+  wxString MainFrame::hexToText(wxString input)
+  {
+    wxString output = "";
+    wxString hexValue;
+
+    if(input.length() %2 == 0){
+
+      for (size_t i = 0; i < input.length(); i += 2)
+      {
+          hexValue = input.Mid(i, 2);
+          long asciiValue;
+          hexValue.ToLong(&asciiValue, 16);
+          output.Append(static_cast<wxChar>(asciiValue));
+      }
+    }
+    return output;
+  }
+  
+  *****************************************************
+  
+  std::cout << std::fixed << std::setprecision(2) << number << std::endl;
+  
+  *****************************************************
+  
+  char ch = 'A';
+    int hexValue = static_cast<int>(ch);
+
+    std::cout << "Charakter: " << ch << std::endl;
+    std::cout << "Hexadezimalwert: 0x" << std::hex << std::uppercase << hexValue << std::endl;
+
+  ******************************************************
+  
+  int keyCode = event.GetKeyCode();
+    //std::cout << "keycode: " << keyCode << std::endl;
+    long currentPosition = textField->GetInsertionPoint();
+    std::cout << "currentPosition hex: " << hexField->GetInsertionPoint() << std::endl;
+    std::cout << "currentPosition: " << currentPosition << std::endl;
+    std::cout << "Lines text: " << textField->GetNumberOfLines() << std::endl;
+    std::cout << "Lines hex: " << hexField->GetNumberOfLines() << std::endl;
+
+     if (keyCode >= 32 && keyCode <= 255)
+    {
+         char keyChar;
+
+          if (event.ShiftDown())
+         {
+             keyChar = std::towupper(static_cast<char>(keyCode));
+             std::cout << "Upper: " << keyChar << std::endl;
+         }
+         else
+         {
+             keyChar = std::towlower(static_cast<char>(keyCode));
+             std::cout << "Lower: "<< keyChar << std::endl;
+         }
+
+        wxString hexoutput = "";
+
+        hexoutput = wxString::Format("%02X", static_cast<int>(keyChar));
+        hexoutput = hexoutput.substr(hexoutput.length() - 2);
+
+        hexField->SetInsertionPoint(currentPosition *2);
+        hexField->WriteText(hexoutput);
+    }
+   }
+  
+  
+  
