@@ -1,0 +1,221 @@
+WX IDS:
+
+enum buttonids {
+BUTTON_A = wxID_HIGHEST + 1,
+BUTTON_CLEAR_ONE,
+...
+};
+
+****************************************************************************
+
+MENU BAR:
+
+wxMenuBar* menu_bar = new wxMenuBar();
+menu_bar->SetFont( wxFont( 14, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxT("Sans") ) );
+menu_bar->SetBackgroundColour(wxColour(220, 220, 220));
+
+wxMenu* file_menu = new wxMenu();
+
+file_menu->Append(wxID_SAVEAS, _("&Save As...\tShift+Ctrl+S"));
+
+file_menu->Append(wxID_EXIT);
+Bind(wxEVT_MENU, &Mainframe::onExit, this, wxID_EXIT);
+
+menu_bar->Append(file_menu, "File");
+
+wxMenu* help_menu = new wxMenu();
+
+help_menu->Append(wxID_ABOUT);
+
+menu_bar-> Append(help_menu, "Help");
+
+this->SetMenuBar( menu_bar );
+
+****************************************************************************
+
+Checkbox:
+
+void Mainframe::onCheckbox(wxCommandEvent& event){
+    //bool is_checked = stats_box->GetValue();
+    if(my_checkbox->GetValue()){
+      this->FindWindowById(ID_CHECKBOX)->Show();
+    }
+    else{
+      this->FindWindowById(ID_CHECKBOX)->Hide();
+    }
+    Layout();
+}
+
+my_checkbox = new wxCheckBox(this, ID_CHECKBOX, "Show", wxDefaultPosition, wxDefaultSize);
+my_checkbox->Bind(wxEVT_CHECKBOX, &Mainframe::onShowStats, this);
+
+*****************************************************************************
+
+Bind(wxEVT_INIT_DIALOG, &Mainframe::OnInitDialog, this);
+
+void onInitDialog(wxCommandEvent& event){
+....
+}
+
+******************************************************************************
+
+units_list = new wxListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+    units_list->Append(drake_.type_name());
+    units_list->Append(elf_.type_name());
+    units_list->Append(dwarf_.type_name());
+
+    units_list->Bind(wxEVT_LISTBOX, &Mainframe::onSelectedUnit, this);
+
+    units_list->SetFont( wxFont( 16, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxT("Sans") ) );
+    
+********************************************************************************
+
+wxMessageBox("This is a viewer for creatures in a mythical game", "About Unit GUI", wxOK | wxICON_INFORMATION);
+
+int answer = wxMessageBox("Quit program?", "Confirm",
+                          wxYES_NO | wxCANCEL, main_frame);
+if (answer == wxYES)
+    main_frame->Close();
+
+********************************************************************************
+
+void MainFrame::onExportTextFileButton(wxCommandEvent& evt)
+  {
+
+    std::string filename = "text.txt";
+
+    wxFileDialog fileDialog(this, "Text speichern", wxEmptyString, wxEmptyString,
+                                "Textdateien (*.txt)|*.txt", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+    if (fileDialog.ShowModal() == wxID_CANCEL){
+        return;  // Abbruch, wenn der Dialog geschlossen wird
+    }
+    filename = fileDialog.GetPath();
+
+    textField->SaveFile(filename);
+  }
+
+___________________________________________________________________________
+
+  void MainFrame::onImportTextFileButton(wxCommandEvent& evt)
+  {
+
+    std::string filename = "text.txt";
+
+    wxFileDialog openFileDialog(this, _("Open XYZ file"), "", "",
+                       "Alle Dateien (*.*)|*.*", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
+    if (openFileDialog.ShowModal() == wxID_CANCEL){
+        return;
+    }
+
+    filename = std::string(openFileDialog.GetPath().mb_str(wxConvUTF8));
+
+    textField->SetFocus();
+    textField->LoadFile(filename);
+  }
+
+************************************************************************************
+
+std::ofstream file(filename);
+
+    if (file.is_open()) {
+        file << "\n\n\n" << "Firmenname" << std::endl;
+        file << "Strasse 00 " <<  std::endl;
+        file << "O000 Ortschaft " <<  std::endl <<  std::endl <<  std::endl;
+        file << "Rechnungsnummer: " << name <<  std::endl;
+        file << "Datum: " << _date <<  std::endl <<  std::endl;
+
+        file << "Vielen Dank"  <<std::endl <<std::endl <<std::endl;
+
+        file.close();
+
+*************************************************************************************
+
+void MainFrame::onExportMarkdownFileButton(wxCommandEvent& evt)
+{
+    // Zeigen Sie den Dialog zum Speichern an
+    wxFileDialog fileDialog(this, "Markdown-Datei speichern", wxEmptyString, wxEmptyString,
+                            "Markdown-Dateien (*.md)|*.md", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+    if (fileDialog.ShowModal() == wxID_CANCEL) {
+        return;  // Abbruch, wenn der Dialog geschlossen wird
+    }
+
+    wxString filename = fileDialog.GetPath();
+
+    // Überprüfen Sie, ob die Dateiendung .md hat (optional)
+    if (!filename.EndsWith(".md", wxSTRING_LEN(filename))) {
+        filename += ".md"; // Füge .md hinzu, wenn es keine Dateiendung gibt
+    }
+
+    // Versuchen Sie, das vorhandene Markdown-Datei (z.B., text.md) an den ausgewählten Ort zu kopieren
+    if (wxCopyFile("text.md", filename, true)) {
+        wxMessageBox("Die Markdown-Datei wurde erfolgreich gespeichert.", "Erfolg", wxICON_INFORMATION | wxOK, this);
+    } else {
+        wxMessageBox("Fehler beim Speichern der Markdown-Datei.", "Fehler", wxICON_ERROR | wxOK, this);
+    }
+}
+*****************************************************************************************
+
+// Einheitsdefinitionen und andere erforderliche Header hier einfügen
+
+class Player {
+public:
+    Player() {}
+
+    // Funktion zum Hinzufügen einer kontrollierten Einheit
+    void addControlledUnit(std::shared_ptr<Unit> unit) {
+        controlled_units_.push_back(unit);
+    }
+
+    // Funktion zum Hinzufügen einer Einheit in die Schlacht
+    void addToBattle(std::shared_ptr<Unit> unit) {
+        units_in_battle_.push_back(unit);
+    }
+
+    // Funktion zum Ermitteln der verbleibenden Einheiten
+    std::vector<std::shared_ptr<Unit>> availableUnits() const {
+        std::vector<std::shared_ptr<Unit>> remaining_units;
+
+        for (const auto& controlled_unit : controlled_units_) {
+            // Überprüfen, ob die Einheit nicht in der Schlacht ist
+            if (std::find(units_in_battle_.begin(), units_in_battle_.end(), controlled_unit) == units_in_battle_.end()) {
+                // Die Einheit ist verfügbar
+                remaining_units.push_back(controlled_unit);
+            }
+        }
+
+        return remaining_units;
+    }
+
+private:
+    std::vector<std::shared_ptr<Unit>> controlled_units_;
+    std::vector<std::shared_ptr<Unit>> units_in_battle_;
+};
+***************************************************************************************************
+#include <iostream>
+#include <iomanip> // Für Formatierungsfunktionen
+
+int main() {
+    int decimalNumber = 255;
+
+    // Hexadezimal umwandeln
+    std::cout << "Hexadezimal: 0x" << std::hex << decimalNumber << std::endl;
+
+    // Binär umwandeln
+    std::cout << "Binär:      0b" << std::bitset<8>(decimalNumber) << std::endl;
+
+    // Oktal umwandeln
+    std::cout << "Oktal:      0" << std::oct << decimalNumber << std::endl;
+
+    return 0;
+}
+*****************************************************************************************************
+
+    int decimalNumber = 255;
+
+    wxString binaryString = wxString::Format("Binär: %b", decimalNumber);
+    wxString octalString = wxString::Format("Oktal: %o", decimalNumber);
+    wxString hexString = wxString::Format("Hexadezimal: %x", hexNumber);
+    
+******************************************************************************************************
